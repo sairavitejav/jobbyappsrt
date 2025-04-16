@@ -16,6 +16,9 @@
   margin-right: 40px;
   width: 20vw;
 }
+.all-filters-container {
+  position: sticky;
+}
 .search-input-container {
   background-color: transparent;
   border: 2px solid #cbd5e1;

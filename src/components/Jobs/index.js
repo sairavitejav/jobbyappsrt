@@ -7,6 +7,7 @@ import Header from '../Header'
 import JobDetails from '../JobDetails'
 import EmploymentFilters from '../EmploymentFilters'
 import SalaryFilters from '../SalaryFilters'
+import LocationFilters from '../LocationFilters'
 import './index.css'
 
 const apiStatusConstants = {
@@ -54,6 +55,14 @@ const salaryRangesList = [
   },
 ]
 
+const locationDetailsList = [
+  {locationId: 'HYDERABAD', label: 'Hyderabad'},
+  {locationId: 'BANGALORE', label: 'Bangalore'},
+  {locationId: 'CHENNAI', label: 'Chennai'},
+  {locationId: 'DELHI', label: 'Delhi'},
+  {locationId: 'MUMBAI', label: 'Mumbai'},
+]
+
 class Jobs extends Component {
   state = {
     profileDetails: [],
@@ -63,6 +72,7 @@ class Jobs extends Component {
     jobsApiStatus: apiStatusConstants.initial,
     employmentTypeList: [],
     salaryRange: '',
+    activeLocationsList: [],
   }
 
   componentDidMount() {
@@ -73,6 +83,8 @@ class Jobs extends Component {
   getJobsList = async () => {
     this.setState({jobsApiStatus: apiStatusConstants.loading})
     const {searchInput, employmentTypeList, salaryRange} = this.state
+    // console.log(employmentTypeList)
+    // console.log(activeLocationsList)
     const jwtToken = Cookies.get('jwt_token')
     const jobsUrl = `https://apis.ccbp.in/jobs?search=${searchInput}&employment_type=${employmentTypeList}&minimum_package=${salaryRange}`
     const options = {
@@ -207,12 +219,17 @@ class Jobs extends Component {
   )
 
   renderJobSuccess = () => {
-    const {jobsList} = this.state
+    const {jobsList, activeLocationsList} = this.state
+    console.log(activeLocationsList)
+    const filteredJobs =
+      activeLocationsList.length > 0
+        ? jobsList.filter(job => activeLocationsList.includes(job.location))
+        : jobsList
     return (
       <>
-        {jobsList.length !== 0 ? (
+        {filteredJobs.length !== 0 ? (
           <ul>
-            {jobsList.map(eachJob => (
+            {filteredJobs.map(eachJob => (
               <JobDetails eachJob={eachJob} key={eachJob.id} />
             ))}
           </ul>
@@ -269,6 +286,21 @@ class Jobs extends Component {
     }
   }
 
+  onchangeLocation = label => {
+    const {activeLocationsList} = this.state
+    const isAlreadyChecked = activeLocationsList.includes(label)
+    if (isAlreadyChecked) {
+      const uncheckList = activeLocationsList.filter(
+        location => location !== label,
+      )
+      this.setState({activeLocationsList: uncheckList})
+    } else {
+      this.setState(prevState => ({
+        activeLocationsList: [...prevState.activeLocationsList, label],
+      }))
+    }
+  }
+
   render() {
     const {searchInput} = this.state
     return (
@@ -280,27 +312,40 @@ class Jobs extends Component {
           <div className="left-side-main-cont">
             {this.renderProfileViews()}
             <hr />
-            <h1 className="filter-heads">Type of Employment</h1>
-            <ul className="filters-list">
-              {employmentTypesList.map(eachEmployment => (
-                <EmploymentFilters
-                  eachEmployment={eachEmployment}
-                  onClickEmployment={this.onClickEmployment}
-                  key={eachEmployment.employmentTypeId}
-                />
-              ))}
-            </ul>
-            <hr />
-            <h1 className="filter-heads">Salary Range</h1>
-            <ul className="filters-list">
-              {salaryRangesList.map(eachSalary => (
-                <SalaryFilters
-                  eachSalary={eachSalary}
-                  key={eachSalary.salaryRangeId}
-                  onClickRadioItem={this.onClickRadioItem}
-                />
-              ))}
-            </ul>
+            <div className="all-filters-container">
+              <h1 className="filter-heads">Type of Employment</h1>
+              <ul className="filters-list">
+                {employmentTypesList.map(eachEmployment => (
+                  <EmploymentFilters
+                    eachEmployment={eachEmployment}
+                    onClickEmployment={this.onClickEmployment}
+                    key={eachEmployment.employmentTypeId}
+                  />
+                ))}
+              </ul>
+              <hr />
+              <h1 className="filter-heads">Salary Range</h1>
+              <ul className="filters-list">
+                {salaryRangesList.map(eachSalary => (
+                  <SalaryFilters
+                    eachSalary={eachSalary}
+                    key={eachSalary.salaryRangeId}
+                    onClickRadioItem={this.onClickRadioItem}
+                  />
+                ))}
+              </ul>
+              <hr />
+              <h1 className="filter-heads">Location Details</h1>
+              <ul className="filters-list">
+                {locationDetailsList.map(eachLocation => (
+                  <LocationFilters
+                    onchangeLocation={this.onchangeLocation}
+                    eachLocation={eachLocation}
+                    key={eachLocation.locationId}
+                  />
+                ))}
+              </ul>
+            </div>
           </div>
           <div>
             <div className="search-input-container">
