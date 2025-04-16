@@ -1,0 +1,14 @@
+.each-skill {
+  display: flex;
+  list-style-type: none;
+  align-items: center;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+.skill-image {
+  width: 30px;
+  margin-right: 20px;
+}
+.skill-name {
+  color: #ffffff;
+}
